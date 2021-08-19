@@ -89,3 +89,6 @@ db.sqlite3
 
 # .idea
 .idea/
+
+# Settings Django
+myIIT/settings.py
