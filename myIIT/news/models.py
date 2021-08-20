@@ -26,5 +26,5 @@ class Article(models.Model):
 
     class Meta:
         ordering = ['-date_published']
-        verbose_name = 'Статья'
-        verbose_name_plural = 'Новости'
+        verbose_name = 'статья'
+        verbose_name_plural = 'новости'
