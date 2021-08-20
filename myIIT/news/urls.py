@@ -5,7 +5,9 @@ from .views import *
 app_name = 'news'
 urlpatterns = [
     path('article/create/', ArticleCreateView.as_view()),
+    path('article/<int:pk>', ArticleDetailView.as_view()),
     path('article/', ArticlesListView.as_view()),
-    path('article/category/create/', CategoryArticleCreateView.as_view()),
-    path('article/category/', CategoriesArticleListView.as_view()),
+    path('category/create/', CategoryArticleCreateView.as_view()),
+    path('category/<int:pk>', CategoryArticleDetailView.as_view()),
+    path('category/', CategoriesArticleListView.as_view()),
 ]
