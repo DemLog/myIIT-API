@@ -47,7 +47,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         dt = datetime.now() + timedelta(days=1)
 
         token = jwt.encode({
-            'id': self.pk,
+            'id': self.user_id,
             'exp': int(dt.strftime("%S"))
         }, settings.SECRET_KEY, algorithm="HS256")
 
@@ -63,4 +63,3 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def is_staff(self):
         return self.is_admin
-
