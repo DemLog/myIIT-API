@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 
 from .models import User
+from .moodle import MoodleAuth
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -24,15 +25,23 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['token']
 
     def update(self, instance, validated_data):
+        email = validated_data.pop('email', None)
         password = validated_data.pop('password', None)
 
-        for key, value in validated_data.items():
-            print(key, value)
+        if email is None or password is None:
+            raise serializers.ValidationError(
+                'Введите email и пароль!'
+            )
+
+        moodle = MoodleAuth(email, password)
+        moodle_data = moodle.check_account()
+        if 'error_message' in moodle_data:
+            raise serializers.ValidationError(moodle_data['error_message'])
+
+        for key, value in moodle_data.items():
             setattr(instance, key, value)
 
-        if password is not None:
-            instance.set_password(password)
-
+        instance.set_password(password)
         instance.save()
 
         return instance
