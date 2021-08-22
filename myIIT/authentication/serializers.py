@@ -98,3 +98,25 @@ class LoginSerializer(serializers.Serializer):
             'user_id': user.user_id,
             'token': user.token
         }
+
+
+class LoginVKSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    token = serializers.CharField(max_length=255, read_only=True)
+
+    def validate(self, data):
+
+        try:
+            user = User.objects.get(user_id=data['user_id'])
+        except User.DoesNotExist:
+            user = None
+
+        if user is None:
+            raise serializers.ValidationError(
+                'Такого аккаунта нет в базе.'
+            )
+
+        return {
+            'user_id': user.user_id,
+            'token': user.token
+        }

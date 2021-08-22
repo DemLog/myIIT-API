@@ -4,8 +4,15 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from collections import OrderedDict
+from base64 import b64encode
+from hashlib import sha256
+from hmac import HMAC
+from django.conf import settings
+from urllib.parse import urlencode
+
 from .serializers import (
-    RegistrationSerializer, LoginSerializer, UserSerializer
+    RegistrationSerializer, LoginSerializer, UserSerializer, LoginVKSerializer
 )
 
 
@@ -51,6 +58,29 @@ class UserLoginAPIView(APIView):
         user = request.data
 
         serializer = LoginSerializer(data=user)
+        serializer.is_valid(raise_exception=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserLoginVKAPIView(APIView):
+    permission_classes = (AllowAny,)
+    serializer_class = LoginVKSerializer
+
+    def get(self, request):
+
+        if not ('sign' in request.GET):
+            return Response({"error": "Нет ключа подписи ВК."}, status=status.HTTP_400_BAD_REQUEST)
+
+        vk_subset = OrderedDict(sorted(x for x in request.GET.items() if x[0][:3] == "vk_"))
+        hash_code = b64encode(
+            HMAC(settings.SECRET_KEY_VK_APP.encode(), urlencode(vk_subset, doseq=True).encode(), sha256).digest()
+        )
+        decoded_hash_code = hash_code.decode('utf-8')[:-1].replace('+', '-').replace('/', '_')
+        if not (request.GET["sign"] == decoded_hash_code):
+            return Response({"error": "ID не совпадает с ID из подписи."}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = LoginVKSerializer(data={"user_id": int(request.GET['vk_user_id'])})
         serializer.is_valid(raise_exception=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
