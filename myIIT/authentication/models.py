@@ -44,11 +44,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self._generate_jwt_token()
 
     def _generate_jwt_token(self):
-        dt = datetime.now() + timedelta(days=1)
+        # dt = datetime.now() + timedelta(days=1)
 
         token = jwt.encode({
             'id': self.user_id,
-            'exp': int(dt.strftime("%S"))
+            'exp': datetime.utcnow() + timedelta(seconds=3600)
         }, settings.SECRET_KEY, algorithm="HS256")
 
         return token
@@ -62,4 +62,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @property
     def is_staff(self):
+        return self.is_admin
+
+    @property
+    def is_superuser(self):
         return self.is_admin

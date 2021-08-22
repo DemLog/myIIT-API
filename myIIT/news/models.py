@@ -9,8 +9,8 @@ class CategoryArticle(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = 'Категория'
-        verbose_name_plural = 'Категории'
+        verbose_name = 'категория'
+        verbose_name_plural = 'категории'
 
 
 class Article(models.Model):

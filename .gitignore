@@ -91,4 +91,4 @@ db.sqlite3
 .idea/
 
 # Settings Django
-myIIT/settings.py
+settings.py
