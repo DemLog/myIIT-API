@@ -9,4 +9,5 @@ urlpatterns = [
     path('user/', UserRetrieveUpdateAPIView.as_view()),
     path('create/', UserCreateAPIView.as_view()),
     path('login/', UserLoginAPIView.as_view()),
+    
 ]

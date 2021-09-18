@@ -92,3 +92,4 @@ db.sqlite3
 
 # Settings Django
 settings.py
+myIIT/node_modules/
