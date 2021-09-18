@@ -17,7 +17,7 @@ import {
 } from '@vkontakte/icons';
 import React from "react";
 
-import './sidebar.css'
+import './style/sidebar.css'
 import {useSwipeable} from "react-swipeable";
 
 const sidebar = (props) => {

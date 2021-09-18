@@ -31,7 +31,7 @@ const Auth = (props) => {
             props.setVKUser(fetchedUser);
             const tokenStorageVK = await props.api.getAutoTokenVKStorage();
             if (!tokenStorageVK) {
-                const newToken = await props.api.loginUserVK().catch();
+                const newToken = await props.api.loginUserVK();
                 if (!newToken) return props.setPopout(null);
                 await props.api.setTokenVKStorage(newToken);
             }

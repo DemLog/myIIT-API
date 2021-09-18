@@ -19,6 +19,17 @@ export default class CustomersService {
         return axios.get(url).then(response => response.data).catch(() => null);
     }
 
+    getUserInfo(token) {
+        const url = `${API_URL}api/v1/auth/user/`;
+        return axios.get(url, {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        })
+            .then(response => response.data)
+            .catch(() => null);
+    }
+
     setTokenVKStorage(userToken) {
         const data = Object.assign({}, userToken);
         data['lifetime'] = Date.now();
@@ -36,7 +47,7 @@ export default class CustomersService {
 
             const lifeTime = data.lifetime;
             const nowTime = Date.now();
-            if (nowTime - lifeTime >= 1) {
+            if (nowTime - lifeTime >= 3600000) {
                 const newToken = await loginUserVK();
                 if (!newToken) return null;
                 newToken['lifetime'] = Date.now();
