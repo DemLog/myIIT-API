@@ -27,19 +27,19 @@ class MoodleAuth:
 
     @staticmethod
     def get_user_data(user_session):
-        params = dict.fromkeys([
-            'first_name',
-            'last_name',
-            'patronymic',
-            'email',
-            'country',
-            'city',
-            'status',
-            'study_group',
-            'direction',
-            'profile',
-            'form_study',
-        ], None)
+        params = dict(
+            first_name=None,
+            last_name=None,
+            patronymic='Отчество',
+            email='Адрес электронной почты',
+            country='Страна',
+            city='Город',
+            status='Статус',
+            study_group='Учебная группа',
+            direction='Направление обучения',
+            profile='Профиль',
+            form_study='Форма обучения'
+        )
 
         user = user_session.get('https://eu.iit.csu.ru/user/profile.php')
         user_data = BeautifulSoup(user.text, 'lxml')
@@ -49,24 +49,14 @@ class MoodleAuth:
         params['last_name'], params['first_name'] = full_name[0].split(' ')
 
         detailed_info = user_data.find('div', {'class': 'profile_tree'}).find('section').find('ul').find_all('dd')
-        # Взятие email
-        params['email'] = detailed_info[0].find('a').contents[0]
-        # Взятие страны
-        params['country'] = detailed_info[1].contents[0]
-        # Взятие города
-        params['city'] = detailed_info[2].contents[0]
-        # Взятие статуса
-        params['status'] = detailed_info[3].contents[0]
-        # Взятие группы
-        params['study_group'] = detailed_info[4].contents[0]
-        # Взятие направления
-        params['direction'] = detailed_info[5].contents[0]
-        # Взятие профиля
-        params['profile'] = detailed_info[6].contents[0]
-        # Взятие формы обучения
-        params['form_study'] = detailed_info[7].contents[0]
-        # Взятие отчества
-        params['patronymic'] = detailed_info[12].contents[0]
+        detailed_info_header = user_data.find('div', {'class': 'profile_tree'}).find('section').find('ul').find_all('dt')
+        for key, value in params.items():
+            for x in range(0, len(detailed_info_header)):
+                if detailed_info_header[x].contents[0] == value:
+                    if key == 'email':  # Условие для отлова email
+                        params[key] = detailed_info[x].find('a').contents[0]
+                        continue
+                    params[key] = detailed_info[x].contents[0]
 
         return params
 
