@@ -3,24 +3,24 @@ import bridge from "@vkontakte/vk-bridge";
 
 const API_URL = 'https://192.168.1.49:8000/';
 
-export default class CustomersService {
+export default class AuthService {
 
     constructor(url) {
         this.vkURL = url;
     }
 
-    loginUserMoodle(user) {
+    static loginUserMoodle(user) {
         const url = `${API_URL}api/v1/auth/create/`;
         return axios.post(url,user).then(response => response.data)
     }
 
     loginUserVK(link = this.vkURL) {
-        const url = `${API_URL}vk/${link}/`;
+        const url = `${API_URL}vk/${link}`;
         return axios.get(url).then(response => response.data).catch(() => null);
     }
 
-    getUserInfo(token) {
-        const url = `${API_URL}api/v1/auth/user/`;
+    static getUserInfo(token) {
+        const url = `${API_URL}api/v1/auth/user`;
         return axios.get(url, {
             headers: {
                 'Authorization': `Token ${token}`

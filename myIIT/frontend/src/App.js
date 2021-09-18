@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import bridge from '@vkontakte/vk-bridge';
 import {
+    AdaptivityProvider, AppRoot,
+    ConfigProvider,
     Root,
     ScreenSpinner,
 } from '@vkontakte/vkui';
@@ -16,17 +18,17 @@ const App = () => {
     const [fetchedUser, setUser] = useState(null);
 
     const [popout, setPopout] = useState(<ScreenSpinner size='large'/>);
+    const [scheme, setScheme] = useState('client_light')
 
     const vkURL = window.location.search;
     const authService = new AuthService(vkURL);
-    const getToken = authService.getAutoTokenVKStorage;
+    const getToken = authService.getAutoTokenVKStorage.bind(authService);
 
     useEffect(() => {
         bridge.subscribe(({detail: {type, data}}) => {
             if (type === 'VKWebAppUpdateConfig') {
-                const schemeAttribute = document.createAttribute('scheme');
-                schemeAttribute.value = data.scheme ? data.scheme : 'client_light';
-                document.body.attributes.setNamedItem(schemeAttribute);
+                setScheme(data.scheme ? data.scheme : 'client_light');
+                console.log(data.scheme)
             }
         });
     }, []);
@@ -38,11 +40,19 @@ const App = () => {
     };
 
     return (
-        <Root activeView={activeView}>
-            <Auth id='auth' goView={goView} url={vkURL} api={authService} popout={popout} setPopout={setPopout}
-                  vkUser={fetchedUser} setVKUser={setUser}/>
-            <Main id='main' goView={goView} popout={popout} setPopout={setPopout} vkUser={fetchedUser} token={getToken}/>
-        </Root>
+        <ConfigProvider scheme={scheme}>
+            <AdaptivityProvider>
+                <AppRoot>
+                    <Root activeView={activeView}>
+                        <Auth id='auth' goView={goView} url={vkURL} api={authService} popout={popout}
+                              setPopout={setPopout}
+                              vkUser={fetchedUser} setVKUser={setUser}/>
+                        <Main id='main' goView={goView} popout={popout} setPopout={setPopout} vkUser={fetchedUser}
+                              token={getToken}/>
+                    </Root>
+                </AppRoot>
+            </AdaptivityProvider>
+        </ConfigProvider>
     );
 }
 

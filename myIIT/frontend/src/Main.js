@@ -18,8 +18,10 @@ import Events from "./Events/Events";
 import Timetable from "./Timetable/Timetable";
 import Feedback from "./Feedback/Feedback";
 import Settings from "./panels/settings";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useSwipeable} from "react-swipeable";
+
+import AuthService from "./API/AuthService"
 
 const Main = (props) => {
 
@@ -41,12 +43,28 @@ const Main = (props) => {
         }
     })
 
+    const [userInfo, setUserInfo] = useState({
+        first_name: 'Error',
+        last_name: 'Error',
+        study_group: 'Error'
+    });
+
+    /*useEffect(() => {
+        async function getUserInfo() {
+            const tokenObj = await props.token();
+            const userInfo = await AuthService.getUserInfo(tokenObj.token);
+            if (!userInfo) return props.goView('Auth');
+            setUserInfo(userInfo);
+        };
+        getUserInfo();
+    }, []);*/
+
     return (
-        <View id={props.id} activePanel={activePanel}>
+        <View id={props.id} activePanel={activePanel} popout={props.popout}>
             <Panel id='main'>
                 <div {...handlerSwipe}>
                     <SideBar activateSideBar={activateSideBar} closeSideBar={onSideBarChange} go={onPanelChange}
-                             vkUser={props.vkUser}/>
+                             vkUser={props.vkUser} userInfo={userInfo}/>
                     <Epic activeStory={activeStory} tabbar={
                         <Tabbar>
 
