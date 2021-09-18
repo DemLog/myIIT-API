@@ -15,96 +15,112 @@ import {Icon28CancelCircleFillRed} from '@vkontakte/icons';
 
 import logo from './img/logo.png';
 import './style/Auth.css';
-import AuthService from '../API/AuthService'
+import bridge from "@vkontakte/vk-bridge";
 
-const authService = new AuthService();
+const Auth = (props) => {
 
-class Auth extends React.Component {
+    const [snackbar, setSnackbar] = useState(null);
+    const [inputData, changeInputData] = useState({
+        'email': '',
+        'password': ''
+    });
 
-    constructor(props) {
-        super(props);
+    useEffect(() => {
+        async function getStorageToken() {
+            const fetchedUser = await bridge.send('VKWebAppGetUserInfo');
+            props.setVKUser(fetchedUser);
+            const tokenStorageVK = await props.api.getAutoTokenVKStorage();
+            if (!tokenStorageVK) {
+                const newToken = await props.api.loginUserVK().catch();
+                if (!newToken) return props.setPopout(null);
+                await props.api.setTokenVKStorage(newToken);
+            }
+            props.setPopout(null);
+            return props.goView('main');
+        }
 
-        this.state = {
-            snackbar: null,
-            email: '',
-            password: '',
-        };
+        getStorageToken();
+    }, []);
 
-        this.messageErrorAuth = this.messageErrorAuth.bind(this);
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-    }
-
-    componentDidMount() {
-        const test = authService.loginUserVK(this.props.url);
-        console.log(test.token);
-    }
-
-    messageErrorAuth() {
-        /*if (this.state.snackbar) return;*/
-        this.setState({
-            snackbar:
-                <Snackbar
-                    onClose={() => this.setState({snackbar: null})}
-                    before={<Avatar size={28}
-                                    style={{background: 'var(--accent)'}}><Icon28CancelCircleFillRed/></Avatar>}
-                >
-                    Неверно указан E-mail или пароль
-                </Snackbar>
-        });
-    }
-
-    handleChange(e) {
-        this.setState({
-            [e.target.name]: e.target.value
-        });
-    }
-
-    handleSubmit(e) {
-        e.preventDefault()
-        console.log(window.location.search);
-        if (!this.state.email || !this.state.password) return this.messageErrorAuth()
-    }
-
-    render() {
-        return (
-            <View activePanel='main'>
-                <Panel id='main'>
-                    {/*<PanelHeader>Авторизация</PanelHeader>*/}
-                    <Group>
-                        <div className="auth-body">
-                            <img className="logo" src={logo} alt="Логотип"/>
-                            <FormLayout>
-                                <FormItem top="E-mail Moodle">
-                                    <Input
-                                        type="email"
-                                        name="email"
-                                        value={this.state.email}
-                                        onChange={this.handleChange}
-                                    />
-                                </FormItem>
-
-                                <FormItem top="Пароль">
-                                    <Input
-                                        type="password"
-                                        name="password"
-                                        placeholder="Введите пароль"
-                                        value={this.state.password}
-                                        onChange={this.handleChange}
-                                    />
-                                </FormItem>
-
-                                <FormItem>
-                                    <Button size="l" stretched onClick={this.handleSubmit}>Войти</Button>
-                                </FormItem>
-                            </FormLayout>
-                        </div>
-                    </Group>
-                    {this.state.snackbar}
-                </Panel>
-            </View>
+    const messageError = (msg) => {
+        setSnackbar(
+            <Snackbar
+                onClose={() => setSnackbar(null)}
+                before={<Avatar size={28}
+                                style={{background: 'var(--accent)'}}><Icon28CancelCircleFillRed/></Avatar>}
+            >
+                {msg}
+            </Snackbar>
         )
     }
+
+    const handleChange = (e) => {
+        const {name, value} = e.target;
+        changeInputData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    }
+
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        if (!inputData.email || !inputData.password) return messageError("Заполните все поля!");
+        const query = {
+            'user_id': props.vkUser.id,
+            'email': inputData.email,
+            'password': inputData.password
+        };
+        props.api.loginUserMoodle(query)
+            .then((response) => {
+                const addToken = {
+                    user_id: response.user_id,
+                    token: response.token
+                };
+                props.api.setTokenVKStorage(addToken);
+                props.goView('main');
+        })
+            .catch(() => {
+                return messageError('Неправильный E-Mail или пароль.')
+        });
+    }
+
+    return (
+        <View activePanel='main' popout={props.popout}>
+            <Panel id='main'>
+                {/*<PanelHeader>Авторизация</PanelHeader>*/}
+                <Group>
+                    <div className="auth-body">
+                        <img className="logo" src={logo} alt="Логотип"/>
+                        <FormLayout>
+                            <FormItem top="E-mail Moodle">
+                                <Input
+                                    type="email"
+                                    name="email"
+                                    value={inputData.email}
+                                    onChange={handleChange}
+                                />
+                            </FormItem>
+
+                            <FormItem top="Пароль">
+                                <Input
+                                    type="password"
+                                    name="password"
+                                    placeholder="Введите пароль"
+                                    value={inputData.password}
+                                    onChange={handleChange}
+                                />
+                            </FormItem>
+
+                            <FormItem>
+                                <Button size="l" stretched onClick={handleSubmit}>Войти</Button>
+                            </FormItem>
+                        </FormLayout>
+                    </div>
+                </Group>
+                {snackbar}
+            </Panel>
+        </View>
+    )
 
 }
 
