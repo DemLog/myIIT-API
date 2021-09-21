@@ -17,7 +17,7 @@ import {
 } from '@vkontakte/icons';
 import React from "react";
 
-import './sidebar.css'
+import './style/sidebar.css'
 import {useSwipeable} from "react-swipeable";
 
 const sidebar = (props) => {
@@ -35,8 +35,8 @@ const sidebar = (props) => {
                             textAlign: 'center',
                         }}>
                             <Avatar size={96} src={props.vkUser.photo_100}/>
-                            <Title style={{marginBottom: 8, marginTop: 20}} level="2" weight="medium">Имя из мудл</Title>
-                            <Text style={{marginBottom: 24, color: 'var(--text_secondary)'}}>Группа из мудл</Text>
+                            <Title style={{marginBottom: 8, marginTop: 20}} level="2" weight="medium">{props.userInfo.first_name} {props.userInfo.last_name}</Title>
+                            <Text style={{marginBottom: 24, color: 'var(--text_secondary)'}}>{props.userInfo.study_group}</Text>
                         </Gradient>
                         <Header mode="secondary">Меню</Header>
                         <SimpleCell expandable before={<Icon28UserCircleOutline/>}>Мой профиль</SimpleCell>
