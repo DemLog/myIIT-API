@@ -1,7 +1,7 @@
 import axios from 'axios';
 import bridge from "@vkontakte/vk-bridge";
 
-const API_URL = 'https://192.168.1.49:8000/';
+const API_URL = 'https://myiit.demlovesky.ru/';
 
 export default class AuthService {
 
@@ -9,7 +9,7 @@ export default class AuthService {
         this.vkURL = url;
     }
 
-    static loginUserMoodle(user) {
+    loginUserMoodle(user) {
         const url = `${API_URL}api/v1/auth/create/`;
         return axios.post(url,user).then(response => response.data)
     }
@@ -42,6 +42,7 @@ export default class AuthService {
 
         async function workingWithAsync() {
             const response = await bridge.send("VKWebAppStorageGet", {"keys": ["userToken"]})
+            if (response.keys[0]['value'] === "") return null;
             const data = JSON.parse(response.keys[0]['value']);
             if (data === "") return null;
 

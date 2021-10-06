@@ -14,7 +14,7 @@ body {
     width: 70%;
     background: var(--background_content);
     transform: translateX(-290%);
-    transition: transform 0.5s;
+    transition: all 600ms cubic-bezier(0.8, 0, 0.33, 1);
     overflow-y: scroll;
 }
 
@@ -33,7 +33,7 @@ body {
 /*    background: rgba(0, 0, 0, 0.5);*/
     backdrop-filter: blur(2px);
     visibility: hidden;
-    transition: opacity 0.5s;
+    transition: all 600ms cubic-bezier(0.8, 0, 0.33, 1);
 }
 
 .nav--open .nav__overlay {
