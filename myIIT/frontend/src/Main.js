@@ -113,7 +113,7 @@ const Main = (props) => {
 
                         </Tabbar>
                     }>
-                        <News id='news' onSidebar={onSideBarChange}/>
+                        <News id='news' onSidebar={onSideBarChange} token={props.token()} setPopout={props.setPopout}/>
                         <Events id='events' onSidebar={onSideBarChange}/>
                         <Timetable id='timetable' onSidebar={onSideBarChange}/>
                         <Feedback id='feedback' onSidebar={onSideBarChange}/>
