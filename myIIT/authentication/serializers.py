@@ -18,8 +18,13 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'patronymic',
+            'country',
+            'city',
+            'status',
             'study_group',
             'direction',
+            'profile',
+            'form_study',
             'is_admin'
         ]
         read_only_fields = ['token']
