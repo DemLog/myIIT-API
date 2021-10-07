@@ -1,9 +1,11 @@
-import React, {useEffect, useState} from 'react';
+import React, {Fragment, useEffect, useState} from 'react';
 import {
-    CardGrid,
-    ContentCard, Counter,
+    Avatar,
+    Button, Card,
+    CardGrid, Cell,
+    ContentCard, Counter, Gallery,
     Group, HorizontalScroll,
-    Panel, Placeholder, PullToRefresh, ScreenSpinner,
+    Panel, Placeholder, PullToRefresh, ScreenSpinner, Spacing,
     Tabs,
     TabsItem,
     View
@@ -25,6 +27,7 @@ const News = (props) => {
     const [fetching, setFetching] = useState({enable: false, count: 0});
     const [categories, setCategories] = useState([]);
     const [news, setNews] = useState([]);
+    const [newsVK, setNewsVK] = useState({name: "", photo: "", posts: [], count: 20});
 
     const getNews = async function () {
         const userInfo = await props.token;
@@ -35,14 +38,17 @@ const News = (props) => {
 
         const articlesList = await newsService.getArticles();
         setNews(articlesList);
+        props.setPopout(null);
     }
 
     useEffect(() => {
+        const countVK = newsVK.count ? newsVK.count : 20;
+        console.log(countVK)
         props.setPopout(<ScreenSpinner size='large'/>);
-        getNews();
-        props.setPopout(null);
+        if (tabsNews.activeTab === 'timeline') getNews();
+        if (tabsNews.activeTab === 'iit') getNewsGroup(countVK);
         setFetching(prevState => ({enable: false, count: prevState.count}));
-    }, [fetching.count, tabsNews.activeCategory]);
+    }, [fetching.count, tabsNews, newsVK.count]);
 
     const displayCategories = () => {
         if (categories.length === 0) return undefined;
@@ -106,11 +112,98 @@ const News = (props) => {
         );
     };
 
-    const onRefresh = () => setFetching(prevState => ({enable: true, count: prevState.count+1}));
+    const onRefresh = () => setFetching(prevState => ({enable: true, count: prevState.count + 1}));
 
-    const getNewsGroup = () => {
-
+    const getNewsGroup = async (count) => {
+        const vkToken = await bridge.send("VKWebAppGetAuthToken", {"app_id": 7929802, "scope": ""});
+        const offsetVK = count > 100 ? count : 1;
+        const countVK = count > 100 ? 20 : count;
+        try {
+            const vkNewsInfo = await bridge.send("VKWebAppCallAPIMethod", {
+                "method": "groups.getById",
+                "request_id": "getNewsInfo",
+                "params": {
+                    "group_id": 'csu_iit',
+                    "v": "5.131",
+                    "access_token": vkToken.access_token
+                }
+            });
+            const vkNews = await bridge.send("VKWebAppCallAPIMethod", {
+                "method": "wall.get",
+                "request_id": "getNewsGroup",
+                "params": {
+                    "domain": 'csu_iit',
+                    "count": countVK,
+                    "offset": offsetVK,
+                    "v": "5.131",
+                    "access_token": vkToken.access_token
+                }
+            });
+            setNewsVK(prevState => ({
+                name: vkNewsInfo.response[0].name,
+                photo_50: vkNewsInfo.response[0].photo_50,
+                posts: count > 100 ? prevState.posts.concat(vkNews.response.items) : vkNews.response.items,
+                count: prevState.count
+            }));
+            props.setPopout(null);
+        } catch (e) {
+            setNewsVK({posts: []});
+            props.setPopout(null);
+        }
     };
+
+    const displayNewsGroup = () => {
+        if (newsVK.posts.length === 0) return (
+            <Placeholder
+                header="ИИТ ЧелГУ"
+                action={<Button size="m" onClick={() => open('https://vk.com/csu_iit')}>Присоединиться</Button>}
+            >
+                Невозможно получить последние новости, потому что Вы не подписаны на паблик
+            </Placeholder>
+        )
+
+        const elements = [];
+        newsVK.posts.forEach((article) => {
+            if (article.copy_history) return;
+            const photo = [];
+            if (article.attachments) {
+                article.attachments.forEach(a => {
+                    if (!(a.type === "photo")) return;
+                    photo.push(
+                        <img src={a.photo.sizes[3].url} width={a.photo.sizes[3].width} height={a.photo.sizes[3].height}
+                             style={{display: "block", margin: "0 auto"}}
+                             className="VKPhoto"
+                        />
+                    )
+                })
+            }
+            const datePub = new Date(article.date * 1000).toLocaleString('ru');
+            elements.push(
+                <Card>
+                    <Cell before={<Avatar src={newsVK.photo_50}/>} description={datePub}>{newsVK.name}</Cell>
+                    <div style={{margin: '3%', whiteSpace: "pre-wrap"}}>{article.text}</div>
+                    {photo.length > 1 &&
+                    <Gallery slideWidth="100%" style={{height: "auto"}} bullets="dark">{photo}</Gallery>}
+                    {photo.length == 1 && photo[0]}
+                </Card>
+            )
+        });
+        return (
+            <Fragment>
+                <CardGrid size="l" mode="shadow">
+                    {elements}
+                </CardGrid>
+                <div style={{marginTop: "10px"}}>
+                    <Button
+                        mode="secondary" style={{display: "block", margin: "0 auto"}} size="l"
+                        onClick={() => setNewsVK(prevState => ({...prevState, count: prevState.count + 20}))}
+                    >
+                        Загрузить еще
+                    </Button>
+                </div>
+            </Fragment>
+        );
+    }
 
     return (
         <View id={props.id} activePanel='main'>
@@ -134,6 +227,7 @@ const News = (props) => {
                 <PullToRefresh onRefresh={onRefresh} isFetching={fetching.enable}>
                     <Group>
                         {tabsNews.activeTab === 'timeline' && displayNews()}
+                        {tabsNews.activeTab === 'iit' && displayNewsGroup()}
                     </Group>
                 </PullToRefresh>
             </Panel>

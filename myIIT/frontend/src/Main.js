@@ -22,7 +22,7 @@ import Settings from "./panels/settings";
 import Profile from "./panels/profile"
 
 import {useEffect, useState} from "react";
-import {useSwipeable} from "react-swipeable";
+import {SwipeableProps, useSwipeable} from "react-swipeable";
 
 import AuthService from "./API/AuthService"
 import bridge from "@vkontakte/vk-bridge";
@@ -40,8 +40,16 @@ const Main = (props) => {
 
     const [activateSideBar, setActiveSideBar] = useState(false)
     const onSideBarChange = () => setActiveSideBar(!activateSideBar)
+    const swipeWhiteList = [
+        'TabsItem__in',
+        'TabsItem__after',
+        'VKPhoto'
+    ]
     const handlerSwipe = useSwipeable({
         onSwiped: (SwipeEventData) => {
+            let enable = 0;
+            swipeWhiteList.forEach(x => {if(SwipeEventData.event.target.className.includes(x)) enable = 1;})
+            if(enable) return;
             if (SwipeEventData.dir === "Right" && !activateSideBar) setActiveSideBar(true);
             else if (SwipeEventData.dir === "Left" && activateSideBar) setActiveSideBar(false);
         }
@@ -52,10 +60,6 @@ const Main = (props) => {
         last_name: 'Error',
         study_group: 'Error'
     });
-
-    const test = () => {
-        console.log(props.test)
-    }
 
     useEffect(() => {
         async function getUserInfo() {
