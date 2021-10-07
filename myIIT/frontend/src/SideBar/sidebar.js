@@ -26,7 +26,7 @@ const sidebar = (props) => {
         <nav className={props.activateSideBar ? "nav nav--open" : "nav"}>
             <div className="nav__links">
                 <Group>
-                     <List>
+                    <List>
                         <Gradient style={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -35,11 +35,16 @@ const sidebar = (props) => {
                             textAlign: 'center',
                         }}>
                             <Avatar size={96} src={props.vkUser.photo_100}/>
-                            <Title style={{marginBottom: 8, marginTop: 20}} level="2" weight="medium">{props.userInfo.first_name} {props.userInfo.last_name}</Title>
-                            <Text style={{marginBottom: 24, color: 'var(--text_secondary)'}}>{props.userInfo.study_group}</Text>
+                            <Title style={{marginBottom: 8, marginTop: 20}} level="2"
+                                   weight="medium">{props.userInfo.first_name} {props.userInfo.last_name}</Title>
+                            <Text style={{
+                                marginBottom: 24,
+                                color: 'var(--text_secondary)'
+                            }}>{props.userInfo.study_group}</Text>
                         </Gradient>
                         <Header mode="secondary">Меню</Header>
-                        <SimpleCell expandable before={<Icon28UserCircleOutline/>}>Мой профиль</SimpleCell>
+                        <SimpleCell onClick={props.go} data-to="profile" expandable
+                                    before={<Icon28UserCircleOutline/>}>Мой профиль</SimpleCell>
                         <SimpleCell expandable before={<Icon28Notifications/>}>Уведомления</SimpleCell>
                         <SimpleCell expandable before={<Icon28MessageOutline/>}>Сообщения</SimpleCell>
                         <SimpleCell expandable before={<Icon28InfoOutline/>}>Контакты</SimpleCell>

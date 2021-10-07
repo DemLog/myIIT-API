@@ -30,9 +30,9 @@ const Auth = (props) => {
             const fetchedUser = await bridge.send('VKWebAppGetUserInfo');
             props.setVKUser(fetchedUser);
             const tokenStorageVK = await props.api.getAutoTokenVKStorage();
-            if (!tokenStorageVK) {
+            if (tokenStorageVK === null) {
                 const newToken = await props.api.loginUserVK();
-                if (!newToken) return props.setPopout(null);
+                if (newToken === null) return props.setPopout(null);
                 await props.api.setTokenVKStorage(newToken);
             }
             props.setPopout(null);

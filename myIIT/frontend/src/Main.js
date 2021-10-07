@@ -17,11 +17,15 @@ import News from "./News/News";
 import Events from "./Events/Events";
 import Timetable from "./Timetable/Timetable";
 import Feedback from "./Feedback/Feedback";
+
 import Settings from "./panels/settings";
+import Profile from "./panels/profile"
+
 import {useEffect, useState} from "react";
 import {useSwipeable} from "react-swipeable";
 
 import AuthService from "./API/AuthService"
+import bridge from "@vkontakte/vk-bridge";
 
 const Main = (props) => {
 
@@ -49,15 +53,22 @@ const Main = (props) => {
         study_group: 'Error'
     });
 
-    /*useEffect(() => {
+    const test = () => {
+        console.log(props.test)
+    }
+
+    useEffect(() => {
         async function getUserInfo() {
             const tokenObj = await props.token();
             const userInfo = await AuthService.getUserInfo(tokenObj.token);
-            if (!userInfo) return props.goView('Auth');
+            if (userInfo === null) {
+                bridge.send("VKWebAppStorageSet", {"key": "userToken", "value": ""});
+                return props.goView('auth');
+            }
             setUserInfo(userInfo);
         };
         getUserInfo();
-    }, []);*/
+    }, []);
 
     return (
         <View id={props.id} activePanel={activePanel} popout={props.popout}>
@@ -109,7 +120,8 @@ const Main = (props) => {
                     </Epic>
                 </div>
             </Panel>
-            <Settings id="settings" go={onPanelChange}/>
+            <Settings id="settings" go={onPanelChange} setScheme={props.setScheme} scheme={props.scheme} setPopout={props.setPopout}/>
+            <Profile id="profile" go={onPanelChange} userInfo={userInfo} vkUser={props.vkUser} setPopout={props.setPopout}/>
         </View>
     );
 }
