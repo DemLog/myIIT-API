@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {
     CardGrid,
-    ContentCard,
+    ContentCard, Counter,
     Group, HorizontalScroll,
     Panel, Placeholder, PullToRefresh, ScreenSpinner,
     Tabs,
@@ -22,7 +22,7 @@ const News = (props) => {
         activeCategory: 'all'
     });
 
-    const [fetching, setFetching] = useState(false);
+    const [fetching, setFetching] = useState({enable: false, count: 0});
     const [categories, setCategories] = useState([]);
     const [news, setNews] = useState([]);
 
@@ -35,23 +35,25 @@ const News = (props) => {
 
         const articlesList = await newsService.getArticles();
         setNews(articlesList);
-
-        return props.setPopout(null);
     }
 
     useEffect(() => {
         props.setPopout(<ScreenSpinner size='large'/>);
         getNews();
-    }, []);
+        props.setPopout(null);
+        setFetching(prevState => ({enable: false, count: prevState.count}));
+    }, [fetching.count, tabsNews.activeCategory]);
 
     const displayCategories = () => {
         if (categories.length === 0) return undefined;
         const elements = [];
         categories.forEach((category) => {
+            const count = news.filter(x => x.category === category.id && !x.is_published).length;
             elements.push(
                 <TabsItem
                     onClick={() => setTabsNews(prevState => ({...prevState, activeCategory: category.slug}))}
                     selected={tabsNews.activeCategory === category.slug}
+                    after={<Counter>{count}</Counter>}
                 >
                     {category.name}
                 </TabsItem>
@@ -63,6 +65,7 @@ const News = (props) => {
                     <TabsItem
                         onClick={() => setTabsNews(prevState => ({...prevState, activeCategory: 'all'}))}
                         selected={tabsNews.activeCategory === 'all'}
+                        after={<Counter>{news.length}</Counter>}
                     >
                         Все
                     </TabsItem>
@@ -83,6 +86,11 @@ const News = (props) => {
         );
         const elements = [];
         news.forEach((article) => {
+            if (!(tabsNews.activeCategory === 'all')) {
+                const categoryID = categories.find(category => category.slug === tabsNews.activeCategory).id;
+                if (!(categoryID === article.category)) return;
+            }
+            if (article.is_published) return;
             elements.push(
                 <ContentCard
                     subtitle={"#" + categories[article.category - 1].name}
@@ -98,11 +106,11 @@ const News = (props) => {
         );
     };
 
-    /*const onRefresh = () => {
-        setFetching(true);
-        getNews();
-        setFetching(false);
-    };*/
+    const onRefresh = () => setFetching(prevState => ({enable: true, count: prevState.count+1}));
+
+    const getNewsGroup = () => {
+
+    };
 
     return (
         <View id={props.id} activePanel='main'>
@@ -122,12 +130,12 @@ const News = (props) => {
                         ИИТ ЧелГУ
                     </TabsItem>
                 </Tabs>
-                {displayCategories()}
-                {/*<PullToRefresh onRefresh={onRefresh} isFetching={fetching}>*/}
-                <Group>
-                    {displayNews()}
-                </Group>
-                {/*</PullToRefresh>*/}
+                {tabsNews.activeTab === 'timeline' && displayCategories()}
+                <PullToRefresh onRefresh={onRefresh} isFetching={fetching.enable}>
+                    <Group>
+                        {tabsNews.activeTab === 'timeline' && displayNews()}
+                    </Group>
+                </PullToRefresh>
             </Panel>
         </View>
     )
