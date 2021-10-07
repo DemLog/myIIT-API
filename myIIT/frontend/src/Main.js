@@ -17,7 +17,10 @@ import News from "./News/News";
 import Events from "./Events/Events";
 import Timetable from "./Timetable/Timetable";
 import Feedback from "./Feedback/Feedback";
+
 import Settings from "./panels/settings";
+import Profile from "./panels/profile"
+
 import {useEffect, useState} from "react";
 import {useSwipeable} from "react-swipeable";
 
@@ -118,6 +121,7 @@ const Main = (props) => {
                 </div>
             </Panel>
             <Settings id="settings" go={onPanelChange} setScheme={props.setScheme} scheme={props.scheme} setPopout={props.setPopout}/>
+            <Profile id="profile" go={onPanelChange} userInfo={userInfo} vkUser={props.vkUser} setPopout={props.setPopout}/>
         </View>
     );
 }
