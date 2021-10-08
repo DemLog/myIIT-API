@@ -21,7 +21,7 @@ import './style/sidebar.css'
 import {useSwipeable} from "react-swipeable";
 
 const sidebar = (props) => {
-
+    console.log(props.userInfo)
     return (
         <nav className={props.activateSideBar ? "nav nav--open" : "nav"}>
             <div className="nav__links">
@@ -51,7 +51,7 @@ const sidebar = (props) => {
                         <SimpleCell expandable before={<Icon28GhostOutline/>}>Интерактив</SimpleCell>
                         <SimpleCell onClick={props.go} data-to="settings" expandable
                                     before={<Icon28SettingsOutline/>}>Настройки</SimpleCell>
-                        <SimpleCell expandable before={<Icon28Favorite/>}>Администрирование</SimpleCell>
+                        {props.userInfo.is_admin && <SimpleCell expandable before={<Icon28Favorite/>}>Администрирование</SimpleCell>}
                         <Spacing/>
                         <Cell expandable before={<Icon28QrCodeOutline/>}>Сканировать QR-код</Cell>
                     </List>

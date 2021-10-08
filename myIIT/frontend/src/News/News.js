@@ -38,13 +38,10 @@ const News = (props) => {
 
         const articlesList = await newsService.getArticles();
         setNews(articlesList);
-        props.setPopout(null);
     }
 
     useEffect(() => {
         const countVK = newsVK.count ? newsVK.count : 20;
-        console.log(countVK)
-        props.setPopout(<ScreenSpinner size='large'/>);
         if (tabsNews.activeTab === 'timeline') getNews();
         if (tabsNews.activeTab === 'iit') getNewsGroup(countVK);
         setFetching(prevState => ({enable: false, count: prevState.count}));
@@ -115,6 +112,7 @@ const News = (props) => {
     const onRefresh = () => setFetching(prevState => ({enable: true, count: prevState.count + 1}));
 
     const getNewsGroup = async (count) => {
+        props.setPopout(<ScreenSpinner size='large'/>);
         const vkToken = await bridge.send("VKWebAppGetAuthToken", {"app_id": 7929802, "scope": ""});
         const offsetVK = count > 100 ? count : 1;
         const countVK = count > 100 ? 20 : count;

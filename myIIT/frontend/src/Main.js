@@ -47,9 +47,14 @@ const Main = (props) => {
     ]
     const handlerSwipe = useSwipeable({
         onSwiped: (SwipeEventData) => {
-            let enable = 0;
-            swipeWhiteList.forEach(x => {if(SwipeEventData.event.target.className.includes(x)) enable = 1;})
-            if(enable) return;
+            try {
+                let enable = 0;
+                swipeWhiteList.forEach(x => {if(SwipeEventData.event.target.className.includes(x)) enable = 1;})
+                if(enable) return;
+            }
+            catch (e) {
+                return;
+            }
             if (SwipeEventData.dir === "Right" && !activateSideBar) setActiveSideBar(true);
             else if (SwipeEventData.dir === "Left" && activateSideBar) setActiveSideBar(false);
         }
