@@ -29,6 +29,7 @@
     "eruda": "^2.4.1",
     "eruda-code": "^2.0.0",
     "eruda-dom": "^2.0.0",
+    "jquery": "^3.6.0",
     "jquery-touchswipe": "^1.6.19",
     "prop-types": "^15.7.2",
     "react": "^17.0.2",

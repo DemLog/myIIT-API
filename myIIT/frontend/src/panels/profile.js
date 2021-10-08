@@ -42,7 +42,7 @@ const profile = (props) => {
     return (
         <Panel id={props.id}>
             <PanelHeader left={<PanelHeaderBack onClick={props.go} data-to="main"/>}>
-                Профил
+                Профиль
             </PanelHeader>
             <Group>
                 <Header mode="secondary">Привязанный профиль</Header>
