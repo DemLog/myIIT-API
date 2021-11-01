@@ -1,127 +1,71 @@
-from rest_framework import serializers
+from abc import ABC
+
 from django.contrib.auth import authenticate
+from rest_framework import serializers
 
 from .models import User
-from .moodle import MoodleAuth
 
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+    login = serializers.CharField(max_length=128, write_only=True)
+    password = serializers.CharField(max_length=128, write_only=True)
 
     class Meta:
         model = User
-        fields = [
-            'user_id',
-            'email',
-            'password',
-            'token',
-            'first_name',
-            'last_name',
-            'patronymic',
-            'country',
-            'city',
-            'status',
-            'study_group',
-            'direction',
-            'profile',
-            'form_study',
-            'is_admin'
-        ]
-        read_only_fields = ['token']
-
-    def update(self, instance, validated_data):
-        email = validated_data.pop('email', None)
-        password = validated_data.pop('password', None)
-
-        if email is None or password is None:
-            raise serializers.ValidationError(
-                'Введите email и пароль!'
-            )
-
-        moodle = MoodleAuth(email, password)
-        moodle_data = moodle.check_account()
-        if 'error_message' in moodle_data:
-            raise serializers.ValidationError(moodle_data['error_message'])
-
-        for key, value in moodle_data.items():
-            setattr(instance, key, value)
-
-        instance.set_password(password)
-        instance.save()
-
-        return instance
+        exclude = ('last_login', 'is_superuser', 'user_permissions',)
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(max_length=255, read_only=True)
 
-    class Meta(object):
+    class Meta:
         model = User
-        fields = ['id', 'user_id', 'email', 'password', 'token']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ('id', 'vk_id', 'login', 'password', 'token',)
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
 
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.CharField(max_length=255, write_only=True)
-    user_id = serializers.IntegerField(read_only=True)
+    login = serializers.CharField(max_length=255, write_only=True)
     password = serializers.CharField(max_length=255, write_only=True)
-    token = serializers.CharField(max_length=255, read_only=True)
+    vk_id = serializers.IntegerField(read_only=True)
+    token = serializers.CharField(max_length=256, read_only=True)
 
     def validate(self, data):
-        email = data.get('email', None)
+        login = data.get('login', None)
         password = data.get('password', None)
+        vk_id = self.context.get('vk_id', None)
 
-        if email is None:
-            raise serializers.ValidationError(
-                'Не получен Email в запросе.'
-            )
-        if password is None:
-            raise serializers.ValidationError(
-                'Не получен пароль в запросе'
-            )
-        check_user = User.objects.get(email=email)
-        if check_user is None:
-            raise serializers.ValidationError(
-                'Такого аккаунта нет в базе.'
-            )
+        if vk_id is not None:
+            try:
+                user = User.objects.get(vk_id=vk_id)
+            except User.DoesNotExist:
+                user = None
+        else:
+            if (login and password) is None:
+                raise serializers.ValidationError(
+                    'Не указан Логин Moodle или пароль!'
+                )
+            try:
+                User.objects.get(login=login)
+            except User.DoesNotExist:
+                raise serializers.ValidationError(
+                    'Такого аккаунта не существует в базе!'
+                )
+            user = authenticate(login=login, password=password)
 
-        user = authenticate(username=check_user.user_id, password=password)
         if user is None:
             raise serializers.ValidationError(
-                'Произошла ошибка при запросе в базу. Повторите попытку'
+                'Введен не правильно пароль, либо произошла ошибка на сервере!'
             )
-
         if not user.is_active:
             raise serializers.ValidationError(
-                'Аккаунт деактивирован. Дальнейшие операции с ним недоступны'
+                'Запрещен доступ к системе!'
             )
 
         return {
-            'user_id': user.user_id,
-            'token': user.token
-        }
-
-
-class LoginVKSerializer(serializers.Serializer):
-    user_id = serializers.IntegerField()
-    token = serializers.CharField(max_length=255, read_only=True)
-
-    def validate(self, data):
-
-        try:
-            user = User.objects.get(user_id=data['user_id'])
-        except User.DoesNotExist:
-            user = None
-
-        if user is None:
-            raise serializers.ValidationError(
-                'Такого аккаунта нет в базе.'
-            )
-
-        return {
-            'user_id': user.user_id,
+            'vk_id': user.vk_id,
             'token': user.token
         }

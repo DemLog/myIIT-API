@@ -2,7 +2,7 @@ body {
     --header-height: 50px;
 
     margin: var(--header-height) 0 0 0;
-    font-family: 'Muli', sans-serif;
+    /*font-family: 'Muli', sans-serif;*/
 }
 
 .nav__links {

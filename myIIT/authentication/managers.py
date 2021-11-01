@@ -5,31 +5,32 @@ from .moodle import MoodleAuth
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
-    def _create_user(self, user_id, email, password, **extra_fields):
-        if not email or not user_id:
-            raise ValueError('Не передан ID или Email')
-        email = self.normalize_email(email)
-        moodle = MoodleAuth(email, password)
+    def _create_user(self, login, vk_id, password, **extra_fields):
+
+        if not (login and vk_id):
+            raise AttributeError('Не передан логин или VK ID!')
+
+        moodle = MoodleAuth(login, password)
         moodle_data = moodle.check_account()
         if 'error_message' in moodle_data:
-            raise ValueError(moodle_data['error_message'])
+            raise RuntimeError(moodle_data['error_message'])
         extra_fields.update(moodle_data)
 
-        user = self.model(user_id=user_id, **extra_fields)
+        user = self.model(login=login, vk_id=vk_id, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_user(self, user_id, email, password=None, **extra_fields):
+    def create_user(self, login, vk_id, password=None, **extra_fields):
         extra_fields.setdefault('is_admin', False)
         extra_fields.setdefault('is_superuser', False)
-        return self._create_user(user_id, email, password, **extra_fields)
+        return self._create_user(login, password, vk_id, **extra_fields)
 
-    def create_superuser(self, user_id, email, password, **extra_fields):
+    def create_superuser(self, login, vk_id, password, **extra_fields):
         extra_fields.setdefault('is_admin', True)
         extra_fields.setdefault('is_superuser', True)
 
         if extra_fields.get('is_admin') is not True:
-            raise ValueError('Суперпользователь должен иметь права администратора')
+            raise ValueError('Суперпользователь должен иметь права администратора!')
 
-        return self._create_user(user_id, email, password, **extra_fields)
+        return self._create_user(login, vk_id, password, **extra_fields)

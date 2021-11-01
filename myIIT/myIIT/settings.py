@@ -27,7 +27,7 @@ SECRET_KEY_VK_APP = 'MqKwHxo2gyvc50PEtNDk'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.49',]
+ALLOWED_HOSTS = []
 
 # Application definition
 

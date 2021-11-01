@@ -10,9 +10,10 @@ from .managers import UserManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(verbose_name='Email Moodle', unique=True)
-    password = models.CharField(verbose_name='Пароль Moodle', max_length=64)
-    user_id = models.IntegerField(verbose_name='ID VK', unique=True)
+    login = models.CharField(verbose_name='Логин Moodle', unique=True, max_length=128)
+    password = models.CharField(verbose_name='Пароль Moodle', max_length=128)
+    vk_id = models.IntegerField(verbose_name='VK ID', unique=True)
+    email = models.EmailField(verbose_name='Email Moodle', max_length=256)
     first_name = models.CharField(verbose_name='Имя', max_length=64, blank=True)
     last_name = models.CharField(verbose_name='Фамилия', max_length=64, blank=True)
     patronymic = models.CharField(verbose_name='Отчество', max_length=64, blank=True)
@@ -24,13 +25,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     profile = models.CharField(verbose_name='Профиль', max_length=64, blank=True)
     form_study = models.CharField(verbose_name='Форма обучения', max_length=16, blank=True)
     date_joined = models.DateTimeField(verbose_name='Дата создания', auto_now_add=True)
-    is_active = models.BooleanField(verbose_name='Подтвержденный аккаунт', default=True)
+    is_active = models.BooleanField(verbose_name='Активный аккаунт', default=True)
     is_admin = models.BooleanField(verbose_name='Администратор', default=False)
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'user_id'
-    REQUIRED_FIELDS = ['email', 'password']
+    USERNAME_FIELD = 'login'
+    REQUIRED_FIELDS = ['vk_id', 'password']
 
     class Meta:
         verbose_name = 'пользователь'
@@ -44,13 +45,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self._generate_jwt_token()
 
     def _generate_jwt_token(self):
-        # dt = datetime.now() + timedelta(days=1)
-
         token = jwt.encode({
-            'id': self.user_id,
+            'vk_id': self.vk_id,
             'exp': datetime.utcnow() + timedelta(seconds=3600)
         }, settings.SECRET_KEY, algorithm="HS256")
-
         return token
 
     def get_full_name(self):
