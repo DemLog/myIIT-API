@@ -52,7 +52,7 @@ class CategoryArticleDetailView(generics.RetrieveAPIView):
     queryset = CategoryArticle.objects.all()
 
 
-# отображение, обновление, удаление статьи
+# отображение, обновление, удаление категории
 class CategoryArticleEditView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, IsAdminUser)
     serializer_class = CategoryArticleDetailSerializer

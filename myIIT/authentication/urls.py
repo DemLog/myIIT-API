@@ -10,11 +10,11 @@ from .views import (
 
 app_name = 'authentication'
 urlpatterns = [
-    path('user/', UserRetrieveAPIView.as_view()),
-    path('user/<int:vk_id>', UserRetrieveAPIView.as_view()),
-    # path('user/edit/<int:vk_id>', UserUpdateAPIView.as_view()),
-    path('allusers/', UsersRetrieveListAPIView.as_view()),
-    path('create/', UserCreateAPIView.as_view()),
-    path('login/', UserLoginAPIView.as_view()),
+    path('getProfile', UserRetrieveAPIView.as_view()),
+    path('getUser/<int:vk_id>', UserRetrieveAPIView.as_view()),
+    # path('editUser/<int:vk_id>', UserUpdateAPIView.as_view()),
+    path('getAllUser', UsersRetrieveListAPIView.as_view()),
+    path('regUser', UserCreateAPIView.as_view()),
+    path('loginUser', UserLoginAPIView.as_view()),
     
 ]
