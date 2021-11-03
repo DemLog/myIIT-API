@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'news.apps.NewsConfig',
     'authentication.apps.AuthenticationConfig',
+    'events.apps.EventsConfig',
     'django_extensions',
 ]
 
