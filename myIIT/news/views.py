@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
@@ -24,12 +25,26 @@ class ArticleDetailView(generics.RetrieveAPIView):
     serializer_class = ArticleDetailSerializer
     queryset = Article.objects.all()
 
+    def get_object(self):
+        queryset = self.get_queryset()
+        filter = self.request.query_params.get('id', None)
+        obj = get_object_or_404(queryset, id=filter)
+        self.check_object_permissions(self.request, obj)
+        return obj
+
 
 # отображение, обновление, удаление статьи
 class ArticleEditView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, IsAdminUser)
     serializer_class = ArticleDetailSerializer
     queryset = Article.objects.all()
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        filter = self.request.query_params.get('id', None)
+        obj = get_object_or_404(queryset, id=filter)
+        self.check_object_permissions(self.request, obj)
+        return obj
 
 
 # создание категории новости
@@ -51,9 +66,23 @@ class CategoryArticleDetailView(generics.RetrieveAPIView):
     serializer_class = CategoryArticleDetailSerializer
     queryset = CategoryArticle.objects.all()
 
+    def get_object(self):
+        queryset = self.get_queryset()
+        filter = self.request.query_params.get('id', None)
+        obj = get_object_or_404(queryset, id=filter)
+        self.check_object_permissions(self.request, obj)
+        return obj
+
 
 # отображение, обновление, удаление категории
 class CategoryArticleEditView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, IsAdminUser)
     serializer_class = CategoryArticleDetailSerializer
     queryset = CategoryArticle.objects.all()
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        filter = self.request.query_params.get('id', None)
+        obj = get_object_or_404(queryset, id=filter)
+        self.check_object_permissions(self.request, obj)
+        return obj

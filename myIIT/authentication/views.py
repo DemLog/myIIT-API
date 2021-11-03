@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -20,17 +21,16 @@ from .models import User
 class UserRetrieveAPIView(generics.RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
+    queryset = User.objects.all()
 
-    def retrieve(self, request, *args, **kwargs):
-        user = request.user
-        vk_id = kwargs.get('vk_id', None)
-        if vk_id is not None:
-            try:
-                user = User.objects.get(vk_id=vk_id)
-            except User.DoesNotExist:
-                return Response({"error": "Пользователя с таким ID не существует!"}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = self.serializer_class(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_object(self):
+        queryset = self.get_queryset()
+        filter = self.request.query_params.get('vk_id', None)
+        obj = self.request.user
+        if (filter is not None) and (not filter == '0'):
+            obj = get_object_or_404(queryset, vk_id=filter)
+        self.check_object_permissions(self.request, obj)
+        return obj
 
 
 class UsersRetrieveListAPIView(generics.ListAPIView):
