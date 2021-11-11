@@ -38,7 +38,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = 'пользователи'
 
     def __str__(self):
-        return self.email
+        return self.get_full_name()
 
     @property
     def token(self):
