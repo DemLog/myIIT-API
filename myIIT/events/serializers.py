@@ -34,3 +34,20 @@ class EventDetailAdminSerializer(serializers.ModelSerializer):
 
     def get_status_text(self, obj):
         return obj.get_status_display()
+
+
+class EventUpdateSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Event
+        fields = ('id', 'title', 'description')
+
+
+class EventResolveSerializer(serializers.ModelSerializer):
+    author = UserEventSerializer(read_only=True)
+
+    class Meta:
+        model = Event
+        fields = ('id', 'title', 'description', 'status', 'report', 'author', 'date_create')
+        read_only = ('id', 'author', 'date_create')

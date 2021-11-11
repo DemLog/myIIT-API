@@ -4,12 +4,12 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from .serializers import *
+from .permission import IsAuthorUserOrAdmin
 from .models import Event
 
 
 class EventDetailView(generics.RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = EventDetailSerializer
     queryset = Event.objects.all()
 
     def get_object(self):
@@ -19,10 +19,24 @@ class EventDetailView(generics.RetrieveAPIView):
         self.check_object_permissions(self.request, obj)
         return obj
 
+    def get_serializer_class(self):
+        user = self.request.user
+        if user.is_staff:
+            return EventDetailAdminSerializer
+        return EventDetailSerializer
 
-class EventDetailAdminView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated, IsAdminUser)
-    serializer_class = EventDetailAdminSerializer
+
+class EventCreateView(generics.CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = EventUpdateSerializer
+    queryset = Event.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+class EventUpdateView(generics.UpdateAPIView):
+    permission_classes = (IsAuthenticated, IsAuthorUserOrAdmin)
     queryset = Event.objects.all()
 
     def get_object(self):
@@ -31,3 +45,9 @@ class EventDetailAdminView(generics.RetrieveUpdateDestroyAPIView):
         obj = get_object_or_404(queryset, id=filter)
         self.check_object_permissions(self.request, obj)
         return obj
+
+    def get_serializer_class(self):
+        user = self.request.user
+        if user.is_staff:
+            return EventResolveSerializer
+        return EventUpdateSerializer
