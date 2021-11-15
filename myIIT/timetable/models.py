@@ -17,11 +17,11 @@ class Lecturer(models.Model):
         return self.get_lecture_name()
 
     def get_lecture_name(self):
-        lecture_name = '%s %s. %s.' % (self.last_name, self.first_name[0], self.patronymic[0])
+        lecture_name = '%s %s.%s.' % (self.last_name, self.first_name[0], self.patronymic[0])
         return lecture_name.strip()
 
     def get_lecture(self):
-        if self.position.Length:
+        if len(self.position) > 0:
             return '%s %s' % (self.position, self.get_lecture_name())
         return self.get_lecture_name()
 
@@ -86,11 +86,22 @@ class Subject(models.Model):
 
 
 class LessonSchedule(models.Model):
+    CHOICES = (
+        ('MO', 'Понедельник'),
+        ('TU', 'Вторник'),
+        ('WE', 'Среда'),
+        ('TH', 'Четверг'),
+        ('FR', 'Пятница'),
+        ('SA', 'Суббота'),
+        ('SU', 'Воскресение'),
+    )
+
     subject = models.ForeignKey(Subject, verbose_name='Предмет', on_delete=models.CASCADE)
     groups = models.ManyToManyField(Group, verbose_name='Группы')
     number_week = models.IntegerField(verbose_name='Номер недели')
     lecture = models.ForeignKey(Lecturer, verbose_name='Преподаватель', on_delete=models.SET_NULL, null=True)
     cabinet = models.ForeignKey(ClassCabinet, verbose_name='Кабинет', on_delete=models.SET_NULL, null=True)
+    day_week = models.CharField(verbose_name='День недели', choices=CHOICES, max_length=2)
     time = models.ForeignKey(TimeSchedule, verbose_name='Номер пары', on_delete=models.SET_NULL, null=True)
     start_week = models.IntegerField(verbose_name='Начало недели', default=0)
     end_week = models.IntegerField(verbose_name='Конец недели', default=0)
@@ -101,3 +112,8 @@ class LessonSchedule(models.Model):
 
     def __str__(self):
         return self.subject.title
+
+    def get_day_week(self):
+        for idx, val in enumerate(self.CHOICES):
+            if val[0] == self.day_week:
+                return idx + 1

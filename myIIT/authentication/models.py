@@ -2,8 +2,9 @@ from datetime import datetime, timedelta
 
 import jwt
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.contrib.auth.models import PermissionsMixin
+from django.contrib.auth.models import PermissionsMixin, Group
 from django.contrib.auth.base_user import AbstractBaseUser
 
 from .managers import UserManager
@@ -61,3 +62,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def is_staff(self):
         return self.is_admin
+
+    @property
+    def get_study_group(self):
+        try:
+            group = Group.objects.get(name=self.study_group)
+        except ObjectDoesNotExist:
+            group = Group(name=self.study_group)
+            group.save()
+        finally:
+            return group
+
+
