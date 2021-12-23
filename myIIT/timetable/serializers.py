@@ -23,17 +23,17 @@ class TimeScheduleSerializer(serializers.ModelSerializer):
 
 
 class SubjectListSerializer(serializers.ModelSerializer):
-    lecturers = LecturersListSerializer(read_only=True)
+    type = serializers.CharField(source='get_type_display', read_only=True)
 
     class Meta:
         model = Subject
-        fields = ('title', 'lecturers')
+        fields = ('title', 'type')
 
 
 class LessonScheduleDetailSerializer(serializers.ModelSerializer):
-    subject = serializers.CharField(source='subject.title', read_only=True)
+    subject = serializers.CharField(source='subject.__str__', read_only=True)
     lecture = serializers.CharField(source='lecture.get_lecture', read_only=True)
-    cabinet = serializers.CharField(source='cabinet.get_cabinet')
+    cabinet = serializers.CharField(source='cabinet.__str__', read_only=True)
     time = TimeScheduleSerializer()
     day_week = serializers.IntegerField(source='get_day_week', read_only=True)
 
@@ -43,9 +43,9 @@ class LessonScheduleDetailSerializer(serializers.ModelSerializer):
 
 
 class LessonScheduleListSerializer(serializers.ModelSerializer):
-    subject = serializers.CharField(source='subject.title', read_only=True)
-    lecture = serializers.CharField(source='lecture.get_lecture', read_only=True)
-    cabinet = serializers.CharField(source='cabinet.get_cabinet')
+    subject = serializers.CharField(source='subject.__str__', read_only=True)
+    lecture = serializers.CharField(source='lecture.get_lecture_name', read_only=True)
+    cabinet = serializers.CharField(source='cabinet.__str__', read_only=True)
     time = TimeScheduleSerializer()
     day_week = serializers.IntegerField(source='get_day_week', read_only=True)
 

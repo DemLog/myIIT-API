@@ -14,7 +14,7 @@ class LecturerAdmin(admin.ModelAdmin):
 
 @admin.register(ClassCabinet)
 class ClassCabinetAdmin(admin.ModelAdmin):
-    list_display = ['title', 'type']
+    list_display = ['title', 'building']
 
 
 @admin.register(TimeSchedule)

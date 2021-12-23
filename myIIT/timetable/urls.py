@@ -8,4 +8,6 @@ urlpatterns = [
     path('getTimeSchedule', TimeScheduleListView.as_view()),
     path('getLesson', LessonScheduleDetailView.as_view()),
     path('getAllLesson', LessonScheduleListView.as_view()),
+    path('getTimeTableToday', TimeTableTodayListView.as_view()),
+    path('getTimeTableWeek', TimeTableWeekListView.as_view()),
 ]
