@@ -16,7 +16,7 @@ def is_even_week(day_now):
 
 
 def get_day_week(day_now):
-    return day_now.day // 7 + 1
+    return day_now.weekday() + 1
 
 
 class LecturerDetailView(generics.RetrieveAPIView):
@@ -87,6 +87,6 @@ class TimeTableWeekListView(generics.ListAPIView):
 
     def get_queryset(self):
         group = self.request.user.get_study_group
-        lessons = LessonSchedule.objects.filter(groups=group).order_by('day_week', 'time')
         number_week = 2 if is_even_week(date.today()) else 1
-        return lessons.filter(number_week=number_week)
+        lessons = LessonSchedule.objects.filter(groups=group).filter(number_week=number_week)
+        return lessons
